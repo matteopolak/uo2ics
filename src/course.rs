@@ -30,6 +30,7 @@ impl FromStr for Status {
 #[derive(Debug)]
 pub struct Course {
 	pub name: String,
+	pub code: String,
 	pub status: Status,
 	pub classes: Vec<Class>,
 }
@@ -235,7 +236,10 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
 
 		let status = head.next().unwrap().parse().unwrap();
 
-		let name = node.text().split(" - ").next().unwrap().to_string();
+		let title = node.text();
+		let mut title = title.split(" - ");
+		let code = title.next().unwrap().to_string();
+		let name = title.next().unwrap().to_string();
 		let cols = rows
 			.next()
 			.unwrap()
@@ -298,6 +302,7 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
 
 		courses.push(Course {
 			name,
+			code,
 			status,
 			classes,
 		});

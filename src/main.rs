@@ -37,7 +37,7 @@ fn main() {
 
 			event.summary(&format!(
 				"{} ({}) {}",
-				class.location, class.component, course.name
+				class.location, class.component, course.code
 			));
 
 			let start = class.time.start;
@@ -48,8 +48,8 @@ fn main() {
 				.ends(end.to_utc())
 				.location(&format!("{}, Ottawa, ON, Canada", class.address))
 				.description(&format!(
-					"Section: {} | Instructor: {}",
-					class.section, class.instructor
+					"Name: {} | Section: {} | Instructor: {}",
+					course.name, class.section, class.instructor
 				))
 				// repeat weekly
 				.add_property(
