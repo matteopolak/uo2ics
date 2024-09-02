@@ -1,0 +1,10 @@
+[package]
+name = "uo2ics"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.38"
+chrono-tz = "0.9.0"
+icalendar = { version = "0.16.5", features = ["chrono-tz"] }
+select = "0.6.0"
