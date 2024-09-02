@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chrono = "0.4.38"
-chrono-tz = "0.9.0"
-icalendar = { version = "0.16.5", features = ["chrono-tz"] }
-select = "0.6.0"
+chrono = "0.4"
+chrono-tz = "0.9"
+clap = { version = "4", features = ["derive"] }
+icalendar = { version = "0.16", features = ["chrono-tz"] }
+rrule = "0.13"
+select = "0.6"
