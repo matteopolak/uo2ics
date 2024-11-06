@@ -7,8 +7,6 @@ use select::{
 	predicate::{self, Name},
 };
 
-use crate::TZ;
-
 #[derive(Debug)]
 pub enum Status {
 	Enrolled,
@@ -188,15 +186,25 @@ impl DateTimeRangeRaw {
 		let mut start = first_day;
 		let mut end = first_day;
 
-		start = start.with_hour(u32::from(self.start.0)).unwrap();
-		start = start.with_minute(u32::from(self.start.1)).unwrap();
-		start = start.with_second(0).unwrap();
-		start = start.with_nanosecond(0).unwrap();
+		start = start
+			.with_hour(u32::from(self.start.0))
+			.unwrap()
+			.with_minute(u32::from(self.start.1))
+			.unwrap()
+			.with_second(0)
+			.unwrap()
+			.with_nanosecond(0)
+			.unwrap();
 
-		end = end.with_hour(u32::from(self.end.0)).unwrap();
-		end = end.with_minute(u32::from(self.end.1)).unwrap();
-		end = end.with_second(0).unwrap();
-		end = end.with_nanosecond(0).unwrap();
+		end = end
+			.with_hour(u32::from(self.end.0))
+			.unwrap()
+			.with_minute(u32::from(self.end.1))
+			.unwrap()
+			.with_second(0)
+			.unwrap()
+			.with_nanosecond(0)
+			.unwrap();
 
 		let curr_weekday = start.weekday();
 
@@ -214,7 +222,7 @@ impl DateTimeRangeRaw {
 	}
 }
 
-pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
+pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>, tz: Tz) -> Vec<Course> {
 	let document = if let Some(path) = path {
 		let file = File::open(path).unwrap();
 		Document::from_read(file).unwrap()
@@ -272,16 +280,20 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
 					let location = room.next().unwrap().to_string().replace(')', "");
 
 					let mut start_end = start_end.split(" - ");
-					let start = TZ.from_utc_datetime(
-						&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
-							.unwrap()
-							.and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-					) + chrono::Duration::hours(4);
-					let end = TZ.from_utc_datetime(
-						&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
-							.unwrap()
-							.and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-					) + chrono::Duration::hours(4);
+					let start = tz
+						.from_local_datetime(
+							&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
+								.unwrap()
+								.and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
+						)
+						.unwrap();
+					let end = tz
+						.from_local_datetime(
+							&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
+								.unwrap()
+								.and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
+						)
+						.unwrap();
 
 					let class = Class {
 						section,
@@ -290,7 +302,6 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
 						location,
 						address,
 						instructor,
-
 						end,
 					};
 

@@ -5,11 +5,8 @@ mod course;
 
 use std::{fs::File, io::Write, path::PathBuf};
 
-use chrono_tz::Tz;
 use clap::Parser;
-use icalendar::{Calendar, Component, Event, EventLike};
-
-pub const TZ: Tz = chrono_tz::Canada::Eastern;
+use icalendar::{Calendar, CalendarDateTime, Component, Event, EventLike};
 
 #[derive(Parser)]
 struct Args {
@@ -21,11 +18,13 @@ struct Args {
 
 fn main() {
 	let args = Args::parse();
+	let tz = chrono_tz::America::Toronto;
 
-	let courses = course::parse_from_file(args.path);
+	let courses = course::parse_from_file(args.path, tz);
 	let mut calendar = Calendar::new();
 
 	calendar.name("University of Ottawa");
+	calendar.timezone(tz.name());
 
 	for course in courses {
 		if matches!(course.status, course::Status::Waiting) {
@@ -44,8 +43,14 @@ fn main() {
 			let end = class.time.end;
 
 			event
-				.starts(start.to_utc())
-				.ends(end.to_utc())
+				.starts(CalendarDateTime::WithTimezone {
+					date_time: start.naive_local(),
+					tzid: tz.name().to_string(),
+				})
+				.ends(CalendarDateTime::WithTimezone {
+					date_time: end.naive_local(),
+					tzid: tz.name().to_string(),
+				})
 				.location(&format!("{}, Ottawa, ON, Canada", class.address))
 				.description(&format!(
 					"Name: {} | Section: {} | Instructor: {}",
