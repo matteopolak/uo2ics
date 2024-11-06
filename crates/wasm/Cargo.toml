@@ -1,0 +1,18 @@
+[package]
+name = "uo2ics"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Polak <contact@matteopolak.com>"]
+description = "WebAssembly bindings for uo2ics"
+repository = "https://github.com/matteopolak/uo2ics"
+license = "MIT"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+uo2ics-core.path = "../core"
+wasm-bindgen = "0.2"

@@ -7,6 +7,8 @@ use select::{
 	predicate::{self, Name},
 };
 
+use crate::TZ;
+
 #[derive(Debug)]
 pub enum Status {
 	Enrolled,
@@ -26,6 +28,7 @@ impl FromStr for Status {
 }
 
 #[derive(Debug)]
+#[must_use]
 pub struct Course {
 	pub name: String,
 	pub code: String,
@@ -112,6 +115,7 @@ pub struct DateTimeRangeRaw {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[must_use]
 pub struct DateTimeRange {
 	pub start: DateTime<Tz>,
 	pub end: DateTime<Tz>,
@@ -182,6 +186,10 @@ impl FromStr for DateTimeRangeRaw {
 impl DateTimeRangeRaw {
 	/// Convert the raw time range into a `DateTimeRange`, where the first day is
 	/// the first day of the upcoming school year.
+	///
+	/// # Panics
+	///
+	/// Panics if the weekday is not in the range 0..5.
 	pub fn into_datetime_range(self, first_day: DateTime<Tz>) -> DateTimeRange {
 		let mut start = first_day;
 		let mut end = first_day;
@@ -222,7 +230,24 @@ impl DateTimeRangeRaw {
 	}
 }
 
-pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>, tz: Tz) -> Vec<Course> {
+/// Parse the HTML from uoZone into a list of courses.
+///
+/// # Panics
+///
+/// See [`parse_from_document`].
+#[must_use]
+pub fn parse_from_buf(buf: &[u8]) -> Vec<Course> {
+	let document = Document::from_read(buf).unwrap();
+
+	parse_from_document(&document)
+}
+
+/// Parse the HTML from a file into a list of courses.
+///
+/// # Panics
+///
+/// See [`parse_from_document`].
+pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>) -> Vec<Course> {
 	let document = if let Some(path) = path {
 		let file = File::open(path).unwrap();
 		Document::from_read(file).unwrap()
@@ -230,9 +255,20 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>, tz: Tz) -> Vec<Course> {
 		Document::from_read(std::io::stdin()).unwrap()
 	};
 
+	parse_from_document(&document)
+}
+
+/// Parse the HTML document from uoZone into a list of courses.
+///
+/// # Panics
+///
+/// Panics if the HTML document is not in the expected format.
+/// This is a bug in the program and should be reported.
+#[must_use]
+pub fn parse_from_document(doc: &Document) -> Vec<Course> {
 	let mut courses = Vec::new();
 
-	for node in document.find(predicate::Class("PAGROUPDIVIDER")) {
+	for node in doc.find(predicate::Class("PAGROUPDIVIDER")) {
 		let class = node.parent().unwrap().parent().unwrap();
 		let mut rows = class.find(predicate::Class("PSLEVEL3GRID"));
 
@@ -280,14 +316,14 @@ pub fn parse_from_file<P: AsRef<Path>>(path: Option<P>, tz: Tz) -> Vec<Course> {
 					let location = room.next().unwrap().to_string().replace(')', "");
 
 					let mut start_end = start_end.split(" - ");
-					let start = tz
+					let start = TZ
 						.from_local_datetime(
 							&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
 								.unwrap()
 								.and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
 						)
 						.unwrap();
-					let end = tz
+					let end = TZ
 						.from_local_datetime(
 							&NaiveDate::parse_from_str(start_end.next().unwrap(), "%m/%d/%Y")
 								.unwrap()

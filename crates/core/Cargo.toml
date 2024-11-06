@@ -1,0 +1,15 @@
+[package]
+name = "uo2ics-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Polak <contact@matteopolak.com>"]
+repository = "https://github.com/matteopolak/uo2ics"
+license = "MIT"
+
+[dependencies]
+chrono = "0.4"
+chrono-tz = "0.9"
+icalendar = { version = "0.16", features = ["chrono-tz"] }
+rrule = "0.13"
+select = "0.6"
+

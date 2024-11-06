@@ -1,12 +1,5 @@
-[package]
-name = "uo2ics"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["crates/cli", "crates/core", "crates/wasm"]
+default-members = ["crates/cli"]
+resolver = "2"
 
-[dependencies]
-chrono = "0.4"
-chrono-tz = "0.9"
-clap = { version = "4", features = ["derive"] }
-icalendar = { version = "0.16", features = ["chrono-tz"] }
-rrule = "0.13"
-select = "0.6"

@@ -1,30 +1,19 @@
 #![feature(iter_array_chunks)]
 #![warn(clippy::pedantic)]
 
-mod course;
-
-use std::{fs::File, io::Write, path::PathBuf};
-
-use clap::Parser;
+use course::Course;
 use icalendar::{Calendar, CalendarDateTime, Component, Event, EventLike};
 
-#[derive(Parser)]
-struct Args {
-	#[clap(value_name = "FILE", value_hint = clap::ValueHint::FilePath)]
-	path: Option<PathBuf>,
-	#[clap(short, long, value_hint = clap::ValueHint::FilePath)]
-	output: Option<PathBuf>,
-}
+pub mod course;
 
-fn main() {
-	let args = Args::parse();
-	let tz = chrono_tz::America::Toronto;
+pub const TZ: chrono_tz::Tz = chrono_tz::America::Toronto;
 
-	let courses = course::parse_from_file(args.path, tz);
+#[must_use]
+pub fn create_calendar(courses: Vec<Course>) -> Calendar {
 	let mut calendar = Calendar::new();
 
 	calendar.name("University of Ottawa");
-	calendar.timezone(tz.name());
+	calendar.timezone(TZ.name());
 
 	for course in courses {
 		if matches!(course.status, course::Status::Waiting) {
@@ -45,11 +34,11 @@ fn main() {
 			event
 				.starts(CalendarDateTime::WithTimezone {
 					date_time: start.naive_local(),
-					tzid: tz.name().to_string(),
+					tzid: TZ.name().to_string(),
 				})
 				.ends(CalendarDateTime::WithTimezone {
 					date_time: end.naive_local(),
-					tzid: tz.name().to_string(),
+					tzid: TZ.name().to_string(),
 				})
 				.location(&format!("{}, Ottawa, ON, Canada", class.address))
 				.description(&format!(
@@ -77,10 +66,5 @@ fn main() {
 		}
 	}
 
-	if let Some(output) = args.output {
-		let mut file = File::create(output).unwrap();
-		write!(&mut file, "{calendar}").unwrap();
-	} else {
-		write!(&mut std::io::stdout(), "{calendar}").unwrap();
-	}
+	calendar
 }

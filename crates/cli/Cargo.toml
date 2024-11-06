@@ -1,0 +1,12 @@
+[package]
+name = "uo2ics-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Polak <contact@matteopolak.com>"]
+description = "uo2ics command-line interface"
+repository = "https://github.com/matteopolak/uo2ics"
+license = "MIT"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+uo2ics-core.path = "../core"

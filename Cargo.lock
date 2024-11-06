@@ -817,9 +817,24 @@ checksum = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe"
 name = "uo2ics"
 version = "0.1.0"
 dependencies = [
+ "uo2ics-core",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "uo2ics-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "uo2ics-core",
+]
+
+[[package]]
+name = "uo2ics-core"
+version = "0.1.0"
+dependencies = [
  "chrono",
  "chrono-tz 0.9.0",
- "clap",
  "icalendar",
  "rrule",
  "select",
