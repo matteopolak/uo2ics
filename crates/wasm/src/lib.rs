@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = fromHtml)]
 #[must_use]
 pub fn from_html(html: &str) -> String {
 	let courses = uo2ics_core::course::parse_from_buf(html.as_bytes());
