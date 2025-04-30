@@ -313,7 +313,7 @@ pub fn parse_from_document(doc: &Document) -> Vec<Course> {
 					let time: DateTimeRangeRaw = time.parse().unwrap();
 					let mut room = location.splitn(2, " (");
 					let address = room.next().unwrap().to_string();
-					let location = room.next().unwrap().to_string().replace(')', "");
+					let location = room.next().unwrap_or_default().to_string().replace(')', "");
 
 					let mut start_end = start_end.split(" - ");
 					let start = TZ
